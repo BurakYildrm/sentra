@@ -1,13 +1,6 @@
-export type AuthActionResult =
-  | { ok: true; error: null }
-  | { ok: false; error: string };
+import { SignInInput } from "./validation";
 
-export type AuthSignInArgs = {
-  email: string;
-  password: string;
-};
-
-export type AuthSignInFn = (args: AuthSignInArgs) => Promise<{
+export type AuthSignInFn = (args: SignInInput) => Promise<{
   data: { user: unknown | null };
   error: { message: string } | null;
 }>;

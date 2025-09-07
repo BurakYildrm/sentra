@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { SignInInputSchema } from "@/types/validation-schemas";
+import { SignInInputSchema } from "@/types/validation";
 
 export async function login(data: unknown) {
   const { data: signInData, error } = SignInInputSchema.safeParse(data);
@@ -20,7 +20,7 @@ export async function login(data: unknown) {
     signInData,
   );
 
-  if (result.error) {
+  if (!result.ok) {
     return { error: result.error };
   }
 
@@ -32,7 +32,7 @@ export async function logout() {
   const supabase = await createClient();
   const result = await logoutCore(() => supabase.auth.signOut());
 
-  if (result.error) {
+  if (!result.ok) {
     return { error: result.error };
   }
 
