@@ -1,7 +1,7 @@
 import { loginCore, logoutCore } from "@/lib/auth-core";
 import { describe, expect, it, vi } from "vitest";
 
-describe("Auth Core", () => {
+describe("Core Auth Functions", () => {
   it("loginCore returns error on bad credentials", async () => {
     const signIn = vi.fn().mockResolvedValue({
       data: { user: null },
