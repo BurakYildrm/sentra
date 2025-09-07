@@ -64,7 +64,7 @@ export function ArticleForm({
       const result = await createArticle(data);
 
       if (result?.error) {
-        toast.error(result.error.message, { id: "create-article" });
+        toast.error(result.error, { id: "create-article" });
       } else {
         toast.success("Article created successfully", { id: "create-article" });
       }
@@ -78,7 +78,7 @@ export function ArticleForm({
       const result = await updateArticle({ ...data, id: article!.id });
 
       if (result?.error) {
-        toast.error(result.error.message, { id: "update-article" });
+        toast.error(result.error, { id: "update-article" });
       } else {
         toast.success("Article updated successfully", { id: "update-article" });
       }

@@ -79,7 +79,7 @@ export function ArticleDisplay({ data }: ArticleDisplayProps) {
               </p>
             </CardHeader>
             <CardContent className="overflow-hidden">
-              <p className="text-sm line-clamp-5 sm:line-clamp-3">
+              <p className="text-sm whitespace-pre-wrap line-clamp-5 sm:line-clamp-3">
                 {article.content}
               </p>
             </CardContent>

@@ -39,7 +39,7 @@ export function ArticleDeleteAlertDialog({
     const result = await deleteArticle(id);
 
     if (result?.error) {
-      toast.error(result.error.message, {
+      toast.error(result.error, {
         id: "delete-article",
       });
     } else {
