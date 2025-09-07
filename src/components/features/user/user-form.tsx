@@ -31,7 +31,7 @@ import {
   CreateUserFormValues,
   UpdateUserFieldsSchema,
   UpdateUserFormValues,
-} from "@/types/validation-schemas";
+} from "@/types/validation";
 
 export type UserFormProps = {
   user?: Tables<"users"> & { role: Tables<"user_roles">["role"] };
@@ -77,7 +77,7 @@ export function UserForm({
       const result = await createUser(data as CreateUserFormValues);
 
       if (result?.error) {
-        toast.error(result.error.message, { id: "create-user" });
+        toast.error(result.error, { id: "create-user" });
       } else {
         toast.success("User created successfully", { id: "create-user" });
       }
@@ -97,7 +97,7 @@ export function UserForm({
       );
 
       if (result?.error) {
-        toast.error(result.error.message, { id: "update-user" });
+        toast.error(result.error, { id: "update-user" });
       } else {
         toast.success("User updated successfully", { id: "update-user" });
       }

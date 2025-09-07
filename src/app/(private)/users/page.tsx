@@ -9,7 +9,7 @@ export default async function UsersPage() {
   const { data, error } = await getAllUsers();
 
   if (error || !data) {
-    return <div>Error: {error?.message}</div>;
+    return <div>Error: {error}</div>;
   }
 
   return (

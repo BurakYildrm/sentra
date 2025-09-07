@@ -7,7 +7,7 @@ export default async function ArticlesPage() {
   const { data, error } = await getAllArticles();
 
   if (error || !data) {
-    return <div>Error: {error?.message}</div>;
+    return <div>Error: {error}</div>;
   }
 
   return (

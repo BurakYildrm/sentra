@@ -1,43 +1,41 @@
 "use server";
 
+import { canPerform } from "@/lib/shared";
+import {
+  createUserCore,
+  deleteUserCore,
+  listUsersCore,
+  updateUserCore,
+} from "@/lib/user-core";
 import { createClient as createClientAdmin } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
-import { Tables } from "@/types/database.types";
 import {
   CreateUserInputSchema,
   DeleteUserInputSchema,
   UpdateUserInputSchema,
-} from "@/types/validation-schemas";
+} from "@/types/validation";
 
 export async function getAllUsers() {
   const supabase = await createClient();
-  const usersPromise = supabase.from("users").select("*");
-  const UserRolesPromise = supabase.from("user_roles").select("*");
-  const [users, userRoles] = await Promise.all([
-    usersPromise,
-    UserRolesPromise,
-  ]);
 
-  if (users.error || userRoles.error) {
-    return { error: users.error || userRoles.error };
+  const result = await listUsersCore(
+    async () => await supabase.from("users").select("*"),
+    async () => await supabase.from("user_roles").select("*"),
+  );
+
+  if (!result.ok) {
+    return { error: result.error };
   }
 
-  const usersWithRoles = users.data.map((user) => {
-    return {
-      ...user,
-      role: userRoles.data.find((role) => role.user_id === user.id)?.role,
-    };
-  });
-
-  return { data: usersWithRoles, error: null };
+  return { data: result.data, error: null };
 }
 
 export async function deleteUser(data: unknown) {
   const { data: id, error } = DeleteUserInputSchema.safeParse(data);
 
   if (error) {
-    return { error };
+    return { error: error.message };
   }
 
   const supabase = await createClient();
@@ -48,15 +46,16 @@ export async function deleteUser(data: unknown) {
     },
   );
 
-  if (!rolePermissions.includes("delete")) {
-    return { error: new Error("You are not authorized to delete this user") };
-  }
-
   const admin = await createClientAdmin();
-  const { error: authError } = await admin.auth.admin.deleteUser(id);
 
-  if (authError) {
-    return { authError };
+  const result = await deleteUserCore(
+    canPerform(rolePermissions),
+    id,
+    (userId) => admin.auth.admin.deleteUser(userId),
+  );
+
+  if (!result.ok) {
+    return { error: result.error };
   }
 
   return { error: null };
@@ -66,7 +65,7 @@ export async function createUser(data: unknown) {
   const { data: user, error: zodError } = CreateUserInputSchema.safeParse(data);
 
   if (zodError) {
-    return { error: zodError };
+    return { error: zodError.message };
   }
 
   const supabase = await createClient();
@@ -77,73 +76,32 @@ export async function createUser(data: unknown) {
     },
   );
 
-  if (!rolePermissions.includes("insert")) {
-    return { error: new Error("You are not authorized to create a user") };
-  }
-
   const admin = await createClientAdmin();
-  const {
-    data: { user: newUser },
-    error: authError,
-  } = await admin.auth.admin.createUser({
-    email: user.email,
-    password: user.password,
-    email_confirm: true,
-  });
 
-  if (authError) {
-    return { authError };
-  }
+  const result = await createUserCore(
+    canPerform(rolePermissions),
+    user,
+    async (userData) =>
+      await admin.auth.admin.createUser({ ...userData, email_confirm: true }),
+    async (userData) => await supabase.from("users").insert(userData),
+    async (userData) => await supabase.from("user_roles").insert(userData),
+  );
 
-  const { error: usersError } = await supabase.from("users").insert({
-    id: newUser?.id,
-    name: user.name,
-  });
-
-  if (usersError) {
-    return { usersError };
-  }
-
-  const { error: userRolesError } = await supabase.from("user_roles").insert({
-    user_id: newUser?.id,
-    role: user.role,
-  });
-
-  if (userRolesError) {
-    return { userRolesError };
+  if (!result.ok) {
+    return { error: result.error };
   }
 
   return { error: null };
 }
 
-function pick<T, K extends readonly (keyof T)[]>(
-  obj: T,
-  keys: K,
-): Pick<T, K[number]> {
-  const out = {} as Pick<T, K[number]>;
-  for (const k of keys) out[k] = obj[k];
-  return out;
-}
-
-export async function updateUser(
-  data: unknown,
-  // user: Tables<"users"> & { role: Tables<"user_roles">["role"] },
-  // fieldsToUpdate: string[],
-) {
+export async function updateUser(data: unknown) {
   const { data: zodData, error: zodError } =
     UpdateUserInputSchema.safeParse(data);
 
   if (zodError) {
-    return { error: zodError };
+    return { error: zodError.message };
   }
 
-  const { user, fieldsToUpdate } = zodData;
-
-  if (fieldsToUpdate.length === 0) {
-    return { error: new Error("No fields to update") };
-  }
-
-  const promises = [];
   const supabase = await createClient();
   const { data: rolePermissions } = await supabase.rpc(
     "get_table_permissions",
@@ -152,37 +110,21 @@ export async function updateUser(
     },
   );
 
-  if (!rolePermissions.includes("update")) {
-    return { error: new Error("You are not authorized to update this user") };
+  const result = await updateUserCore(
+    canPerform(rolePermissions),
+    zodData,
+    async (userData, id) =>
+      await supabase.from("users").update(userData).eq("id", id),
+    async (roleData, userId) =>
+      await supabase.from("user_roles").update(roleData).eq("user_id", userId),
+    async () => {
+      await supabase.auth.refreshSession();
+    },
+  );
+
+  if (!result.ok) {
+    return { error: result.error };
   }
 
-  if (fieldsToUpdate.includes("role")) {
-    const userRolesPromise = supabase
-      .from("user_roles")
-      .update({
-        role: user.role,
-      })
-      .eq("user_id", user.id);
-
-    promises.push(userRolesPromise);
-    delete fieldsToUpdate[fieldsToUpdate.indexOf("role")];
-  }
-
-  if (fieldsToUpdate.length >= 1) {
-    const usersPromise = supabase
-      .from("users")
-      .update(pick(user, fieldsToUpdate as (keyof Tables<"users">)[]))
-      .eq("id", user.id);
-
-    promises.push(usersPromise);
-  }
-
-  const result = await Promise.all(promises);
-
-  if (result.some((result) => result.error)) {
-    return { error: result.find((result) => result.error)?.error };
-  }
-
-  await supabase.auth.refreshSession();
   return { error: null };
 }

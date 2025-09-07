@@ -19,10 +19,7 @@ import { Input } from "@/components/ui/input";
 
 import { Alert, AlertTitle } from "../../ui/alert";
 
-import {
-  SignInFieldsSchema,
-  SignInFormValues,
-} from "@/types/validation-schemas";
+import { SignInFieldsSchema, SignInFormValues } from "@/types/validation";
 
 export function LoginForm() {
   const form = useForm<SignInFormValues>({

@@ -41,7 +41,7 @@ export function UserDeleteAlertDialog({
     const result = await deleteUser(id);
 
     if (result.error) {
-      toast.error(result.error.message, {
+      toast.error(result.error, {
         id: "delete-user",
       });
     } else {

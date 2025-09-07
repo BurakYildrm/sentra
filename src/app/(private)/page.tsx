@@ -9,7 +9,7 @@ export default async function Home() {
   const [articles, users] = await Promise.all([articlesPromise, usersPromise]);
 
   if (articles.error || users.error || !articles.data || !users.data) {
-    return <div>Error: {articles.error?.message || users.error?.message}</div>;
+    return <div>Error: {articles.error || users.error}</div>;
   }
 
   const chartData = [
