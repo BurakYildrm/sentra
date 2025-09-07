@@ -1,21 +1,20 @@
 import {
   Article,
-  ArticleCreateFn,
-  ArticleDeleteFn,
-  ArticleListFn,
-  ArticleUpdateFn,
-  CoreResult,
+  ArticlesDeleteFn,
+  ArticlesInsertFn,
+  ArticlesSelectFn,
+  ArticlesUpdateFn,
 } from "@/types/article";
-import { Can } from "@/types/permission";
+import { Can, CoreResult } from "@/types/shared";
 import {
   CreateArticleInput,
   DeleteArticleInput,
   UpdateArticleInput,
-} from "@/types/validation-schemas";
+} from "@/types/validation";
 
 /** READ */
 export async function listArticlesCore(
-  fn: ArticleListFn,
+  fn: ArticlesSelectFn,
 ): Promise<CoreResult<Article[]>> {
   const { data, error } = await fn();
 
@@ -28,7 +27,7 @@ export async function listArticlesCore(
 
 /** CREATE */
 export async function createArticleCore(
-  fn: ArticleCreateFn,
+  fn: ArticlesInsertFn,
   can: Can,
   input: CreateArticleInput,
 ): Promise<CoreResult> {
@@ -47,7 +46,7 @@ export async function createArticleCore(
 
 /** UPDATE */
 export async function updateArticleCore(
-  fn: ArticleUpdateFn,
+  fn: ArticlesUpdateFn,
   can: Can,
   input: UpdateArticleInput,
 ): Promise<CoreResult> {
@@ -66,7 +65,7 @@ export async function updateArticleCore(
 
 /** DELETE */
 export async function deleteArticleCore(
-  fn: ArticleDeleteFn,
+  fn: ArticlesDeleteFn,
   can: Can,
   input: DeleteArticleInput,
 ): Promise<CoreResult> {

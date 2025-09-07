@@ -6,14 +6,15 @@ import {
   listArticlesCore,
   updateArticleCore,
 } from "@/lib/article-core";
-import { canPerform } from "@/lib/permission";
+import { canPerform } from "@/lib/shared";
 import { createClient } from "@/utils/supabase/server";
 
+import { Tables } from "@/types/database.types";
 import {
   CreateArticleInputSchema,
   DeleteArticleInputSchema,
   UpdateArticleInputSchema,
-} from "@/types/validation-schemas";
+} from "@/types/validation";
 
 // export async function getAllArticles() {
 //   const supabase = await createClient();
@@ -37,7 +38,7 @@ export async function getAllArticles() {
     return { error: result.error };
   }
 
-  return { data: result.data, error: null };
+  return { data: result.data as Tables<"articles">[], error: null };
 }
 
 // export async function createArticle(data: unknown) {

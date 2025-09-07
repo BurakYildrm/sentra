@@ -21,10 +21,7 @@ import {
 import { Input } from "../../ui/input";
 
 import { Tables } from "@/types/database.types";
-import {
-  ArticleFieldsSchema,
-  ArticleFormValues,
-} from "@/types/validation-schemas";
+import { ArticleFieldsSchema, ArticleFormValues } from "@/types/validation";
 
 export type UserFormProps = {
   article?: Tables<"articles">;

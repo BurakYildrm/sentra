@@ -1,24 +1,20 @@
 import { Tables } from "./database.types";
 
-export type CoreResult<T = void> =
-  | { ok: true; data?: T }
-  | { ok: false; error: string };
-
 export type Article = Omit<Tables<"articles">, "created_at" | "updated_at">;
 
-export type ArticleListFn = () => Promise<{
+export type ArticlesSelectFn = () => Promise<{
   data: Article[] | null;
   error: { message: string } | null;
 }>;
 
-export type ArticleDeleteFn = (
+export type ArticlesDeleteFn = (
   id: string,
 ) => Promise<{ error: { message: string } | null }>;
 
-export type ArticleUpdateFn = (
+export type ArticlesUpdateFn = (
   article: Article,
 ) => Promise<{ error: { message: string } | null }>;
 
-export type ArticleCreateFn = (
+export type ArticlesInsertFn = (
   article: Omit<Article, "id">,
 ) => Promise<{ error: { message: string } | null }>;
