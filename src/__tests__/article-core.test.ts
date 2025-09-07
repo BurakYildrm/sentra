@@ -4,7 +4,7 @@ import {
   listArticlesCore,
   updateArticleCore,
 } from "@/lib/article-core";
-import { canPerform } from "@/lib/permission";
+import { canPerform } from "@/lib/shared";
 import { describe, expect, it, vi } from "vitest";
 
 const ok = { error: null as any };
