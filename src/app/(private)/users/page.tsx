@@ -1,8 +1,9 @@
 import { getAllUsers } from "@/actions/user-actions";
+
+import { UserAddButton } from "@/components/features/user/user-add-button";
 import { DataTable } from "@/components/ui/data-table";
+
 import { columns } from "./columns";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
 
 export default async function UsersPage() {
   const { data, error } = await getAllUsers();
@@ -13,10 +14,14 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4 mt-4">
-      <h1 className="text-2xl font-bold">Users</h1>
+      <div className="flex flex-row justify-between">
+        <h1 className="text-2xl font-bold">Users</h1>
+        <UserAddButton />
+      </div>
       <DataTable columns={columns} data={data} />
-      {/* <DataTable columns={columns} data={data} />
-      <Skeleton className="rounded-md border h-60 w-full" /> */}
+      <p className="text-muted-foreground text-sm">
+        Total users: {data.length}
+      </p>
     </div>
   );
 }

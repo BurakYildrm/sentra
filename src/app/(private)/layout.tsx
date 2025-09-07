@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
 import "@/app/globals.css";
-import { Geist_Mono, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/ui/header";
-import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import type { Metadata } from "next";
+import { Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { redirect } from "next/navigation";
+
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { Header } from "@/components/layout/header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistMono = Geist_Mono({
@@ -28,17 +31,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
+  const {
+    data: { user: authUser },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (error || !data?.user) {
+  if (error || !authUser) {
     redirect("/login");
   }
 
-  const { data: user } = await supabase
+  const { data: dbUser } = await supabase
     .from("users")
     .select("*")
-    .eq("id", data.user.id)
+    .eq("id", authUser.id)
     .single();
+
+  const user = { ...dbUser, email: authUser.email };
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -51,11 +59,16 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header title="Sentra" user={user} />
-          <div className="font-sans grid grid-rows-[1fr] min-h-(--main-height) container mx-auto px-4">
-            {children}
-          </div>
-          <Toaster />
+          <SidebarProvider defaultOpen={false}>
+            <AppSidebar user={user} />
+            <div className="flex-1">
+              <Header title="Sentra" user={user} />
+              <div className="font-sans grid grid-rows-[1fr] min-h-(--main-height) container mx-auto px-4">
+                {children}
+              </div>
+            </div>
+            <Toaster richColors />
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

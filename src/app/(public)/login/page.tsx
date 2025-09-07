@@ -1,7 +1,8 @@
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LoginForm } from "@/components/forms/login-form";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+
+import { LoginForm } from "@/components/features/auth/login-form";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default async function LoginPage() {
   const supabase = await createClient();

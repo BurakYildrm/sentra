@@ -1,12 +1,24 @@
-"use client";
+import { getAllArticles } from "@/actions/article-actions";
+import { getAllUsers } from "@/actions/user-actions";
 
-import { ChartPie } from "@/components/ui/chart-pie";
-import { redirect } from "next/navigation";
+import { ChartDisplay } from "@/components/features/home/chart-display";
 
-export default function Home() {
+export default async function Home() {
+  const articlesPromise = getAllArticles();
+  const usersPromise = getAllUsers();
+  const [articles, users] = await Promise.all([articlesPromise, usersPromise]);
+
+  if (articles.error || users.error || !articles.data || !users.data) {
+    return <div>Error: {articles.error?.message || users.error?.message}</div>;
+  }
+
   const chartData = [
-    { name: "articles", value: 2, fill: "var(--color-articles)" },
-    { name: "users", value: 3, fill: "var(--color-users)" },
+    {
+      name: "articles",
+      value: articles.data.length,
+      fill: "var(--color-articles)",
+    },
+    { name: "users", value: users.data.length, fill: "var(--color-users)" },
   ];
 
   const chartConfig = {
@@ -20,33 +32,11 @@ export default function Home() {
     },
   };
 
-  const handleChartClick = (data: {
-    name: string;
-    value: number;
-    fill: string;
-  }) => {
-    redirect(`/${data.name}`);
-  };
-
   return (
-    <main className="flex flex-col items-center gap-3 justify-center">
-      <ChartPie
-        data={chartData}
-        config={chartConfig}
-        onClick={handleChartClick}
-        showIndicator
-        showLabel
-        className="size-60 sm:hidden **:cursor-pointer"
-      />
-      <ChartPie
-        data={chartData}
-        config={chartConfig}
-        onClick={handleChartClick}
-        showIndicator
-        className="max-sm:hidden sm:size-80 md:size-90 lg:size-120 **:cursor-pointer"
-      />
+    <main className="flex flex-col items-center justify-center gap-3">
+      <ChartDisplay data={chartData} config={chartConfig} />
       <p className="text-muted-foreground leading-none">
-        Showing total resources
+        Showing total of {articles.data.length + users.data.length} resources
       </p>
     </main>
   );

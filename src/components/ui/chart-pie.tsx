@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/utils/tailwind";
 import { LabelList, Pie, PieChart } from "recharts";
 
 import {
@@ -8,8 +9,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import React from "react";
-import { cn } from "@/utils/tailwind";
 
 interface PieChartLabelProps {
   data: {
@@ -57,14 +56,12 @@ export function ChartPie({
   showLabel = false,
   showIndicator = false,
 }: PieChartLabelProps) {
-  console.log("rendered");
-
   return (
     <ChartContainer
       config={config}
       className={cn(
         "[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square pb-0",
-        className
+        className,
       )}
     >
       <PieChart>

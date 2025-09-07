@@ -38,27 +38,62 @@ export type Database = {
         }
         Relationships: []
       }
-      users: {
+      role_permissions: {
         Row: {
-          created_at: string
-          id: string
-          name: string
-          role: string
-          updated_at: string
+          id: number
+          permission: Database["public"]["Enums"]["app_permission"]
+          role: Database["public"]["Enums"]["app_role"]
         }
         Insert: {
-          created_at?: string
-          id: string
-          name: string
-          role?: string
-          updated_at?: string
+          id?: number
+          permission: Database["public"]["Enums"]["app_permission"]
+          role: Database["public"]["Enums"]["app_role"]
         }
         Update: {
-          created_at?: string
+          id?: number
+          permission?: Database["public"]["Enums"]["app_permission"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: number
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: number
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id: string
+          name: string
+        }
+        Update: {
           id?: string
           name?: string
-          role?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -67,13 +102,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: { target: string }
+      authorize: {
+        Args: {
+          requested_permission: Database["public"]["Enums"]["app_permission"]
+        }
         Returns: boolean
+      }
+      custom_access_token_hook: {
+        Args: { event: Json }
+        Returns: Json
+      }
+      get_current_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      grant_permissions: {
+        Args: {
+          perms: Database["public"]["Enums"]["app_permission"][]
+          r: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      app_permission:
+        | "users.insert"
+        | "users.update"
+        | "users.delete"
+        | "articles.insert"
+        | "articles.update"
+        | "articles.delete"
+      app_role: "admin" | "editor" | "viewer"
+      user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -200,6 +260,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_permission: [
+        "users.insert",
+        "users.update",
+        "users.delete",
+        "articles.insert",
+        "articles.update",
+        "articles.delete",
+      ],
+      app_role: ["admin", "editor", "viewer"],
+      user_role: ["admin", "editor", "viewer"],
+    },
   },
 } as const
