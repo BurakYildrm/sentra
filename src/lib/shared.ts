@@ -1,4 +1,4 @@
-import { Can } from "@/types/permission";
+import { Can } from "@/types/shared";
 
 export function canPerform(perms: Array<"insert" | "update" | "delete">): Can {
   const allowed = new Set(perms ?? []);
