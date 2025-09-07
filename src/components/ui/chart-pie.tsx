@@ -23,31 +23,6 @@ interface PieChartLabelProps {
   showIndicator?: boolean;
 }
 
-// export const PieChartLabel = React.memo(
-//   ({ data, config, onClick, className }: PieChartLabelProps) => {
-//     return (
-//       <ChartContainer
-//         config={config}
-//         className={cn(
-//           "[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square pb-0",
-//           className
-//         )}
-//       >
-//         <PieChart>
-//           <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-//           <Pie
-//             data={data}
-//             dataKey="value"
-//             label
-//             nameKey="name"
-//             onClick={onClick}
-//           />
-//         </PieChart>
-//       </ChartContainer>
-//     );
-//   }
-// );
-
 export function ChartPie({
   data,
   config,

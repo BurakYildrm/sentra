@@ -88,13 +88,10 @@ export function UserForm({
         router.refresh();
       }
     } else {
-      const result = await updateUser(
-        {
-          user: { ...data, id: user!.id },
-          fieldsToUpdate: Object.keys(form.formState.dirtyFields),
-        },
-        // Object.keys(form.formState.dirtyFields),
-      );
+      const result = await updateUser({
+        user: { ...data, id: user!.id },
+        fieldsToUpdate: Object.keys(form.formState.dirtyFields),
+      });
 
       if (result?.error) {
         toast.error(result.error, { id: "update-user" });

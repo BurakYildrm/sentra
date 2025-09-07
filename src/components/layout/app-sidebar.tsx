@@ -22,7 +22,6 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 
 import { Tables } from "@/types/database.types";
 
-// Menu items.
 const items = [
   {
     title: "Users",
