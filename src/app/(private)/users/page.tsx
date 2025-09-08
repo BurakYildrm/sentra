@@ -1,6 +1,7 @@
 import { getAllUsers } from "@/actions/user-actions";
 
 import { UserAddButton } from "@/components/features/user/user-add-button";
+import { ErrorPage } from "@/components/layout/error-page";
 import { DataTable } from "@/components/ui/data-table";
 
 import { columns } from "./columns";
@@ -9,7 +10,7 @@ export default async function UsersPage() {
   const { data, error } = await getAllUsers();
 
   if (error || !data) {
-    return <div>Error: {error}</div>;
+    return <ErrorPage error={error ?? "Unknown error"} />;
   }
 
   return (

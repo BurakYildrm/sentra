@@ -2,6 +2,7 @@ import { getAllArticles } from "@/actions/article-actions";
 import { getAllUsers } from "@/actions/user-actions";
 
 import { ChartDisplay } from "@/components/features/home/chart-display";
+import { ErrorPage } from "@/components/layout/error-page";
 
 export default async function Home() {
   const articlesPromise = getAllArticles();
@@ -9,7 +10,9 @@ export default async function Home() {
   const [articles, users] = await Promise.all([articlesPromise, usersPromise]);
 
   if (articles.error || users.error || !articles.data || !users.data) {
-    return <div>Error: {articles.error || users.error}</div>;
+    return (
+      <ErrorPage error={articles.error || users.error || "Unknown error"} />
+    );
   }
 
   const chartData = [

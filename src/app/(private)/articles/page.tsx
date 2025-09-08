@@ -2,12 +2,13 @@ import { getAllArticles } from "@/actions/article-actions";
 
 import { ArticleAddButton } from "@/components/features/article/article-add-button";
 import { ArticleDisplay } from "@/components/features/article/article-display";
+import { ErrorPage } from "@/components/layout/error-page";
 
 export default async function ArticlesPage() {
   const { data, error } = await getAllArticles();
 
   if (error || !data) {
-    return <div>Error: {error}</div>;
+    return <ErrorPage error={error ?? "Unknown error"} />;
   }
 
   return (
