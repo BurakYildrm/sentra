@@ -1,36 +1,230 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sentra - Admin Panel with RBAC
 
-## Getting Started
+A modern, full-stack admin panel built with Next.js 15, featuring role-based access control (RBAC), comprehensive user and article management, and a beautiful UI built with shadcn/ui and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Authentication**: Supabase auth with protected routes
+- **RBAC**: Admin, Editor, and Viewer roles with granular permissions
+- **User Management**: CRUD operations with role assignment
+- **Article Management**: Content creation and editing with validation
+- **UI**: Responsive design with dark/light theme using shadcn/ui
+- **Data Tables**: Sortable, filterable tables with loading states
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Next.js 15** - React framework with App Router
+- **React 19** - Latest React with concurrent features
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Accessible component primitives
+- **React Hook Form** - Performant form handling
+- **Zod** - Schema validation
+- **Recharts** - Data visualization
+- **Lucide React** - Beautiful icons
+
+### Backend & Database
+
+- **Supabase** - Backend-as-a-Service
+- **PostgreSQL** - Relational database
+- **Row Level Security (RLS)** - Database-level security
+- **Server Actions** - Next.js server-side functions
+
+### Development & Testing
+
+- **Vitest** - Fast unit testing
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **pnpm** - Fast package manager
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── (private)/         # Protected routes
+│   │   ├── articles/      # Article management pages
+│   │   ├── users/         # User management pages
+│   │   └── layout.tsx     # Private layout with sidebar
+│   └── (public)/          # Public routes
+│       └── login/         # Authentication pages
+├── components/            # React components
+│   ├── features/          # Feature-specific components
+│   │   ├── article/       # Article management components
+│   │   ├── auth/          # Authentication components
+│   │   ├── home/          # Dashboard components
+│   │   └── user/          # User management components
+│   ├── layout/            # Layout components
+│   └── ui/                # Reusable UI components
+├── lib/                   # Core business logic
+│   ├── article-core.ts    # Article business logic
+│   ├── auth-core.ts       # Authentication business logic
+│   ├── user-core.ts       # User business logic
+│   └── shared.ts          # Shared utilities
+├── actions/               # Server actions
+│   ├── article-actions.ts # Article server actions
+│   ├── auth-actions.ts    # Authentication server actions
+│   └── user-actions.ts    # User server actions
+├── types/                 # TypeScript type definitions
+├── utils/                 # Utility functions
+└── __tests__/             # Test files
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 18.x or higher
+- pnpm (recommended) or npm
+- Supabase account
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   git clone https://github.com/BurakYildrm/sentra.git
+   cd sentra
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install dependencies**
 
-## Deploy on Vercel
+   ```bash
+   pnpm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Set up environment variables**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
+
+4. **Set up the database**
+   - Create a new Supabase project
+   - Run the SQL migrations (see Database Setup section)
+   - Configure Row Level Security policies
+
+5. **Start the development server**
+
+   ```bash
+   pnpm dev
+   ```
+
+## 🗄️ Database Setup
+
+#### Custom Types
+
+```sql
+create type public.app_permission as enum ('users.insert', 'users.update', 'users.delete', 'articles.insert', 'articles.update', 'articles.delete');
+create type public.app_role as enum ('admin', 'editor', 'viewer');
+```
+
+#### Users Table
+
+```sql
+create table public.users (
+  id          uuid references auth.users not null primary key, -- UUID from auth.users
+  username    text
+);
+```
+
+#### User Roles Table
+
+```sql
+create table public.user_roles (
+  id        bigint generated by default as identity primary key,
+  user_id   uuid references public.users on delete cascade not null,
+  role      app_role not null,
+  unique (user_id, role)
+);
+```
+
+#### Role Permissions Table
+
+```sql
+create table public.role_permissions (
+  id           bigint generated by default as identity primary key,
+  role         app_role not null,
+  permission   app_permission not null,
+  unique (role, permission)
+);
+```
+
+#### Articles Table
+
+```sql
+create table if not exists public.articles (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  content     text not null,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+```
+
+### Row Level Security (RLS)
+
+The application uses Supabase RLS for database-level security with role-based permissions:
+
+| Resource       | Admin                        | Editor               | Viewer |
+| -------------- | ---------------------------- | -------------------- | ------ |
+| **Users**      | Create, Read, Update, Delete | Read                 | Read   |
+| **Articles**   | Create, Read, Update, Delete | Create, Read, Update | Read   |
+| **User Roles** | Create, Read, Update, Delete | Read                 | Read   |
+
+## 🔐 Authorization
+
+Permission checking:
+
+```typescript
+type Permission = "insert" | "update" | "delete";
+type Can = (action: Permission) => boolean;
+function canPerform(perms: Array<Permission>): Can {
+  const allowed = new Set(perms ?? []);
+  return (action: Permission) => allowed.has(action);
+}
+```
+
+## 🧪 Testing
+
+```bash
+pnpm test                    # Run all tests
+pnpm test user-core.test.ts  # Run specific test file
+```
+
+## 🎯 Demo
+
+**[Live Demo](https://sentra-ten.vercel.app/)**
+
+| Role   | Email             | Password |
+| ------ | ----------------- | -------- |
+| Admin  | `admin@test.com`  | `admin`  |
+| Editor | `editor@test.com` | `editor` |
+| Viewer | `viewer@test.com` | `viewer` |
+
+## 🔧 Development
+
+### Scripts
+
+```bash
+pnpm dev     # Start development server
+pnpm build   # Build for production
+pnpm start   # Start production server
+pnpm test    # Run tests
+```
+
+### Code Style
+
+The project follows strict code style guidelines:
+
+- **ESLint** for code linting
+- **Prettier** for code formatting
+- **TypeScript** for type safety
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
