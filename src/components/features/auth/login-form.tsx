@@ -39,7 +39,7 @@ export function LoginForm() {
 
       form.setError("root", {
         type: "server",
-        message: "Invalid email or password",
+        message: result.error,
       });
     } else {
       toast.success("Signed in successfully");

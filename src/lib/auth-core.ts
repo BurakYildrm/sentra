@@ -6,7 +6,7 @@ export async function loginCore(
   fn: AuthSignInFn,
   args: SignInInput,
 ): Promise<CoreResult> {
-  const { error, data } = await fn(args);
+  const { error } = await fn(args);
 
   if (error) {
     return { ok: false, error: error?.message ?? "Invalid credentials" };

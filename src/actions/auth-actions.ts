@@ -11,7 +11,7 @@ export async function login(data: unknown) {
   const { data: signInData, error } = SignInInputSchema.safeParse(data);
 
   if (error) {
-    return { error };
+    return { error: error.message };
   }
 
   const supabase = await createClient();
