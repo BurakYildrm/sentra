@@ -1,6 +1,6 @@
-import { Can } from "@/types/shared";
+import { Can, Permission } from "@/types/shared";
 
-export function canPerform(perms: Array<"insert" | "update" | "delete">): Can {
+export function canPerform(perms: Array<Permission>): Can {
   const allowed = new Set(perms ?? []);
-  return (action: "insert" | "update" | "delete") => allowed.has(action);
+  return (action: Permission) => allowed.has(action);
 }
